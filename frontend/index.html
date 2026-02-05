@@ -7,38 +7,89 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="app">
-        <div class="header">
-            <h1>NeuroGlitch Journal</h1>
-            <p class="subtitle">Your AI-powered mental wellbeing companion</p>
-        </div>
-        <div id="chat-container">
-            <!-- Chat messages will appear here -->
-        </div>
-        <div class="input-area">
-            <input type="text" id="journal-input" placeholder="Type your entry...">
-            <button id="send-btn">Send</button>
-        </div>
-
-        <!-- Dashboard for model training -->
-        <div id="dashboard">
-            <h2>Model Training Dashboard</h2>
-            <form id="train-form">
-                <input type="text" id="model-name" placeholder="Model Name" required>
-                <input type="text" id="model-desc" placeholder="Description">
-                <input type="text" id="dataset-url" placeholder="Dataset URL" required>
-                <select id="model-type" required>
-                    <option value="">Select Model Type</option>
-                    <option value="classification">Classification</option>
-                    <option value="regression">Regression</option>
-                </select>
-                <button type="submit">Start Training</button>
-            </form>
-            <div id="train-status"></div>
-        </div>
-
-        <!-- Animation Enhancement Placeholder: Add animation libraries and custom CSS/JS here -->
-        <!-- Example: Animate.css or custom transitions for UI elements -->
+    <div id="layout">
+        <aside id="sidebar">
+            <div class="sidebar-header">
+                <h2>app</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-btn" data-section="chat">Chat</button>
+                <button class="nav-btn" data-section="mood">Mood</button>
+                <button class="nav-btn" data-section="tools">Self-Help</button>
+                <button class="nav-btn" data-section="resources">Resources</button>
+                <button class="nav-btn" data-section="auth">Auth</button>
+                <button class="nav-btn" data-section="profile">Profile</button>
+            </nav>
+        </aside>
+        <main id="main-content">
+            <div id="app">
+                <div class="header">
+                    <h1>NeuroGlitch</h1>
+                    <p class="subtitle">AI-powered mental wellbeing companion</p>
+                    <div id="theme-switcher">
+                        <button id="light-theme">Light</button>
+                        <button id="dark-theme">Dark</button>
+                        <button id="mint-theme">Mint</button>
+                    </div>
+                </div>
+                <section id="chat-section" class="feature-section">
+                    <h2>Chat with AI</h2>
+                    <select id="personality-selector">
+                        <option value="Compassionate Listener">Compassionate Listener</option>
+                        <option value="Motivating Coach">Motivating Coach</option>
+                        <option value="Wise Friend">Wise Friend</option>
+                        <option value="Neutral Therapist">Neutral Therapist</option>
+                        <option value="Mindfulness Guide">Mindfulness Guide</option>
+                    </select>
+                    <div id="chat-container"></div>
+                    <div class="input-area">
+                        <input type="text" id="chat-input" placeholder="Type your message...">
+                        <button id="chat-send-btn">Send</button>
+                    </div>
+                </section>
+                <section id="mood-section" class="feature-section" style="display:none;">
+                    <h2>Mood Dashboard</h2>
+                    <input type="range" id="mood-scale" min="1" max="5">
+                    <span id="mood-value">3</span>
+                    <textarea id="journal-input" placeholder="Write your journal..."></textarea>
+                    <button id="mood-send-btn">Save Entry</button>
+                    <div id="mood-history"></div>
+                </section>
+                <section id="tools-section" class="feature-section" style="display:none;">
+                    <h2>Self-Help & Wellness Tools</h2>
+                    <button id="yoga-btn">Yoga Recommendation</button>
+                    <button id="focus-btn">Focus Session</button>
+                    <button id="breathing-btn">Breathing Exercise</button>
+                    <button id="coping-btn">Coping Cards</button>
+                    <button id="wellness-btn">Wellness Tips</button>
+                    <div id="tools-output"></div>
+                </section>
+                <section id="resources-section" class="feature-section" style="display:none;">
+                    <h2>Resource & Crisis Help</h2>
+                    <button id="hotlines-btn">Show Hotlines</button>
+                    <button id="doctor-btn">Doctor Recommender</button>
+                    <button id="quizzes-btn">Mental Health Quizzes</button>
+                    <div id="resources-output"></div>
+                </section>
+                <section id="auth-section" class="feature-section" style="display:none;">
+                    <h2>Authentication</h2>
+                    <input type="text" id="auth-username" placeholder="Username">
+                    <input type="password" id="auth-password" placeholder="Password">
+                    <button id="login-btn">Login</button>
+                    <button id="oauth-btn">OAuth Login</button>
+                    <button id="guest-btn">Guest Access</button>
+                    <div id="auth-status"></div>
+                </section>
+                <section id="profile-section" class="feature-section" style="display:none;">
+                    <h2>User Profile</h2>
+                    <input type="text" id="profile-name" placeholder="Name">
+                    <input type="text" id="profile-picture" placeholder="Picture URL">
+                    <input type="number" id="profile-fontsize" placeholder="Font Size" min="10" max="32">
+                    <button id="save-profile-btn">Save Profile</button>
+                    <div id="profile-output"></div>
+                </section>
+            </div>
+        </main>
     </div>
     <script src="app.js"></script>
 </body>
