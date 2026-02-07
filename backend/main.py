@@ -1,33 +1,20 @@
-# NeuroGlitch Backend (FastAPI with LangChain)
-from fastapi import FastAPI, Request, Depends, HTTPException
-from pydantic import BaseModel
-from typing import Optional
-from fastapi.middleware.cors import CORSMiddleware
-import os
 from dotenv import load_dotenv
-from m import ChatGoogleGenerativeAI
-from langchain.memory import ConversationBufferMemory
-from langchain.chains import ConversationChain
-
-# Load environment variables
+import os
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), 'env', '.env'))
-
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
-SECURITY_KEY = os.getenv('SECURITY_KEY')
+llm = None
 
-# Initialize Gemini LLM
-llm = ChatGoogleGenerativeAI(
-    model="gemini-pro",
-    google_api_key=GEMINI_API_KEY,
-    temperature=0.7
-)
+# NeuroGlitch Backend (FastAPI with LangChain)
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from fastapi.middleware.cors import CORSMiddleware
+from models import predict_journal
+from typing import Optional
+# NOTE: LangChain imports are handled in the guarded block above.
 
-# Store conversation memories per session
-conversation_memories = {}
 
 app = FastAPI()
 
-# Allow CORS for frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -36,6 +23,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialize conversation memories for session management
+conversation_memories = {}
 
 # --- Root ---
 @app.get('/')
@@ -50,32 +39,27 @@ class ChatRequest(BaseModel):
 
 @app.post('/api/chat')
 def chat_endpoint(request: ChatRequest):
+    global llm
+    try:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+    except ImportError:
+        raise HTTPException(
+            status_code=500,
+            detail="LangChain not installed. Install langchain, langchain-google-genai, and langchain-community."
+        )
+    if llm is None:
+        if not GEMINI_API_KEY:
+            raise HTTPException(status_code=500, detail="GEMINI_API_KEY not set.")
+        llm = ChatGoogleGenerativeAI(
+            model="gemini-pro",
+            google_api_key=GEMINI_API_KEY,
+            temperature=0.7
+        )
     # Get or create conversation memory for this session
     session_id = request.session_id or "default"
     
     if session_id not in conversation_memories:
-        conversation_memories[session_id] = ConversationBufferMemory()
-    
-    # Create conversation chain with LangChain
-    import torch
-
-    # Phase 1: Tensor Exercise
-    # Create a random tensor (2x3)
-    tensor_a = torch.rand(2, 3)
-    # Create another random tensor (3x2)
-    tensor_b = torch.rand(3, 2)
-    # Multiply tensors (matrix multiplication)
-    result = torch.matmul(tensor_a, tensor_b)
-
-    print("Tensor A:", tensor_a)
-    print("Tensor B:", tensor_b)
-    print("Result (A x B):", result)
-    print("Result shape:", result.shape)
-    conversation = ConversationChain(
-        llm=llm,
-        memory=conversation_memories[session_id],
-        verbose=False
-    )
+        conversation_memories[session_id] = []
     
     # Phase 2: DistilBERT Journal Entry Prediction
 
@@ -89,8 +73,14 @@ def chat_endpoint(request: ChatRequest):
 
     # Phase 3: Fine-Tuning DistilBERT on Mental Health Dataset
     import pandas as pd
+    import torch
     from torch.utils.data import Dataset, DataLoader
-    from transformers import AdamW
+    from torch.optim import AdamW
+    from transformers import AutoModelForSequenceClassification, AutoTokenizer
+    
+    # Initialize model and tokenizer
+    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
+    model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=2)
 
     # Placeholder: Load your dataset (CSV with 'text' and 'label' columns)
     # Replace 'mental_health.csv' with your actual dataset file
@@ -136,7 +126,16 @@ def chat_endpoint(request: ChatRequest):
     
     # Get response from Gemini
     try:
-        response = conversation.predict(input=request.message)
+        history = conversation_memories[session_id]
+        history.append(("user", request.message))
+        prompt_lines = []
+        for role, msg in history[-10:]:
+            prefix = "User" if role == "user" else "Assistant"
+            prompt_lines.append(f"{prefix}: {msg}")
+        prompt = "\n".join(prompt_lines) + "\nAssistant:"
+        result = llm.invoke(prompt)
+        response = result.content if hasattr(result, "content") else str(result)
+        history.append(("assistant", response))
         return {
             "response": response,
             "session_id": session_id,

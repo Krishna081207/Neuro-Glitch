@@ -1,5 +1,6 @@
 import torch
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, AdamW
+from torch.optim import AdamW
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader
 
