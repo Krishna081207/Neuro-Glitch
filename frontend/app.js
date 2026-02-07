@@ -1,3 +1,31 @@
+// UI Enhancement: Handle journal analysis and display risk
+document.getElementById('mood-send-btn').addEventListener('click', async () => {
+    const journalText = document.getElementById('journal-input').value;
+    if (!journalText.trim()) {
+        document.getElementById('risk-result').textContent = 'Please enter your journal text.';
+        return;
+    }
+    document.getElementById('risk-result').textContent = 'Analyzing...';
+    const data = await sendJournalEntry(journalText);
+    document.getElementById('risk-result').textContent = `Risk Level: ${data.risk_level}`;
+});
+// Sample function to send journal text to backend and display risk level
+async function sendJournalEntry(journalText) {
+    const response = await fetch('http://localhost:8000/api/predict', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ text: journalText })
+    });
+    const data = await response.json();
+    console.log('Risk Level:', data.risk_level);
+    // Display risk level in the UI as needed
+    return data;
+}
+
+// Example usage:
+// sendJournalEntry("I feel like I'm drowning in my work and can't see a way out.");
 // --- Navigation ---
 const sections = ['chat', 'mood', 'tools', 'resources', 'auth', 'profile'];
 document.querySelectorAll('.nav-btn').forEach(btn => {

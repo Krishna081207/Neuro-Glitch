@@ -1,3 +1,15 @@
+.result-box {
+    margin-top: 12px;
+    padding: 12px 18px;
+    border-radius: 16px;
+    background: #fff0f7;
+    color: #b94e8a;
+    font-size: 1.1em;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(185, 78, 138, 0.08);
+    min-height: 24px;
+    text-align: center;
+}
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background: url('photos/1.png') no-repeat center center fixed;

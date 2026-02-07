@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+env/
+.venv/
+
+# Environment variables
+*.env
+backend/env/.env
+
+# Jupyter Notebooks
+*.ipynb
+
+# Data files
+*.csv
+*.tsv
+*.xlsx
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Photos (if sensitive)
+frontend/photos/
+
+# Logs
+*.log
+
+# Model checkpoints
+*.pt
+*.pth
+
+# Other
+backend/__pycache__/
