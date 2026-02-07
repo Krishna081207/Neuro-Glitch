@@ -1,9 +1,11 @@
 # NeuroGlitch
 
+An AI-powered journaling app that analyzes daily text or voice entries. It detects hidden signs of anxiety or depression using sentiment analysis and alerts users if their mental state deteriorates over time.
+
 **Track:** Health Tech
 
 ## Concept
-NeuroGlitch is an AI-powered journaling app for mental wellbeing. Users submit daily text or voice entries, which are analyzed by AI to detect hidden signs of anxiety or depression using sentiment analysis. The app alerts users if their mental state deteriorates over time.
+NeuroGlitch is an AI-powered journaling app for mental wellbeing. Users submit daily text or voice entries, which are analyzed by AI to detect hidden signs of anxiety or depression using sentiment analysis.
 
 ## Tech Stack
 - **Backend & AI:** Python (FastAPI or Flask, NLTK or HuggingFace for NLP)
