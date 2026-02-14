@@ -49,30 +49,74 @@ Object.keys(themeMap).forEach(id => {
     };
 });
 
-// --- Chat Feature ---
-document.getElementById('chat-send-btn').onclick = async function() {
-    const input = document.getElementById('chat-input');
-    const chat = document.getElementById('chat-container');
-    const personality = document.getElementById('personality-selector').value;
-    if (input.value.trim()) {
-        const userMsg = document.createElement('div');
-        userMsg.className = 'chat-user';
-        userMsg.textContent = 'You: ' + input.value;
-        chat.appendChild(userMsg);
-        // Send to backend
-        const res = await fetch('http://localhost:8000/api/chat', {
+const API_BASE = window.__API_BASE__ || 'http://localhost:8000';
+const chatInput = document.getElementById('chat-input');
+const chatContainer = document.getElementById('chat-container');
+const personalitySelector = document.getElementById('personality-selector');
+const chatSendBtn = document.getElementById('chat-send-btn');
+
+function getSessionId() {
+    let sessionId = localStorage.getItem('ng_session_id');
+    if (!sessionId) {
+        sessionId = 'session-' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('ng_session_id', sessionId);
+    }
+    return sessionId;
+}
+
+async function sendChatMessage() {
+    const message = chatInput.value.trim();
+    if (!message) {
+        return;
+    }
+
+    const personality = personalitySelector.value;
+    const session_id = getSessionId();
+
+    const userMsg = document.createElement('div');
+    userMsg.className = 'chat-user';
+    userMsg.textContent = 'You: ' + message;
+    chatContainer.appendChild(userMsg);
+
+    const typingMsg = document.createElement('div');
+    typingMsg.className = 'chat-ai';
+    typingMsg.textContent = 'AI: ...';
+    chatContainer.appendChild(typingMsg);
+
+    chatInput.value = '';
+
+    try {
+        const res = await fetch(`${API_BASE}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: input.value, personality })
+            body: JSON.stringify({ message, personality, session_id })
         });
-        const data = await res.json();
-        const aiMsg = document.createElement('div');
-        aiMsg.className = 'chat-ai';
-        aiMsg.textContent = 'AI: ' + data.response;
-        chat.appendChild(aiMsg);
-        input.value = '';
+
+        let data = {};
+        try {
+            data = await res.json();
+        } catch (err) {
+            data = {};
+        }
+
+        if (!res.ok) {
+            typingMsg.textContent = 'AI error: ' + (data.detail || res.statusText || 'Unknown error');
+            return;
+        }
+
+        typingMsg.textContent = 'AI: ' + (data.response || 'No response');
+    } catch (err) {
+        typingMsg.textContent = 'AI error: Network error';
     }
-};
+}
+
+// --- Chat Feature ---
+chatSendBtn.onclick = sendChatMessage;
+chatInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        sendChatMessage();
+    }
+});
 
 // --- Mood Dashboard ---
 const moodScale = document.getElementById('mood-scale');

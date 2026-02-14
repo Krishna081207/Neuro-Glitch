@@ -51,7 +51,7 @@ def chat_endpoint(request: ChatRequest):
         if not GEMINI_API_KEY:
             raise HTTPException(status_code=500, detail="GEMINI_API_KEY not set.")
         llm = ChatGoogleGenerativeAI(
-            model="gemini-pro",
+            model="gemini-1.5-flash",
             google_api_key=GEMINI_API_KEY,
             temperature=0.7
         )
@@ -61,68 +61,7 @@ def chat_endpoint(request: ChatRequest):
     if session_id not in conversation_memories:
         conversation_memories[session_id] = []
     
-    # Phase 2: DistilBERT Journal Entry Prediction
-
-    # Refactored: Use models.py for prediction
-    from models import predict_journal
-
-    # Example journal entry
-    text = "I feel like I'm drowning in my work and can't see a way out."
-    predicted_class_id = predict_journal(text)
-    print("Prediction:", "Glitch Detected" if predicted_class_id == 1 else "Stable")
-
-    # Phase 3: Fine-Tuning DistilBERT on Mental Health Dataset
-    import pandas as pd
-    import torch
-    from torch.utils.data import Dataset, DataLoader
-    from torch.optim import AdamW
-    from transformers import AutoModelForSequenceClassification, AutoTokenizer
-    
-    # Initialize model and tokenizer
-    tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-    model = AutoModelForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=2)
-
-    # Placeholder: Load your dataset (CSV with 'text' and 'label' columns)
-    # Replace 'mental_health.csv' with your actual dataset file
-    try:
-        df = pd.read_csv('mental_health.csv')
-    except Exception:
-        df = pd.DataFrame({'text': [text], 'label': [predicted_class_id]})  # fallback for demo
-
-    class MentalHealthDataset(Dataset):
-        def __init__(self, dataframe, tokenizer, max_length=128):
-            self.dataframe = dataframe
-            self.tokenizer = tokenizer
-            self.max_length = max_length
-
-        def __len__(self):
-            return len(self.dataframe)
-
-        def __getitem__(self, idx):
-            text = self.dataframe.iloc[idx]['text']
-            label = self.dataframe.iloc[idx]['label']
-            inputs = self.tokenizer(text, truncation=True, padding='max_length', max_length=self.max_length, return_tensors='pt')
-            item = {key: val.squeeze(0) for key, val in inputs.items()}
-            item['labels'] = torch.tensor(label)
-            return item
-
-    # Create dataset and dataloader
-    dataset = MentalHealthDataset(df, tokenizer)
-    dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
-
-    # Training loop (1 epoch for demo)
-    model.train()
-    optimizer = AdamW(model.parameters(), lr=5e-5)
-    for batch in dataloader:
-        optimizer.zero_grad()
-        outputs = model(**{k: v for k, v in batch.items() if k != 'labels'}, labels=batch['labels'])
-        loss = outputs.loss
-        loss.backward()
-        optimizer.step()
-        print(f"Batch loss: {loss.item()}")
-    model.eval()
-
-    print("Fine-tuning complete (demo loop)")
+    # Note: DistilBERT prediction/training is handled by /api/predict and models.py.
     
     # Get response from Gemini
     try:
